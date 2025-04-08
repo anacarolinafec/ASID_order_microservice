@@ -28,7 +28,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: order_pass
     depends_on:
       - mysql-order
-      - rabbitmq
+      #- rabbitmq
     ports:
       - "8081:8081"
     command: >
