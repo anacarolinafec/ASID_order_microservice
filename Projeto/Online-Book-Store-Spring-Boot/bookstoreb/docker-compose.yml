@@ -1,49 +1,40 @@
 services:
-  mysql-shipping:
+  mysql-order:
     image: mysql:8.0.0
-    container_name: mysql-shipping
+    container_name: mysql-order
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: shipping_db
-      MYSQL_USER: shipping_user
-      MYSQL_PASSWORD: shipping_pass
+      MYSQL_DATABASE: order_db
+      MYSQL_USER: order_user
+      MYSQL_PASSWORD: order_pass
     ports:
       # expor localmente na porta 3307 - "3307:3307"
-      - "3307:3306"
+      - "3308:3306"
     volumes:
-      - mysql-shipping-data:/var/lib/mysql
+      - mysql-order-data:/var/lib/mysql
     networks:
-      - shipping-network
+      - order-network
     command: --disable-ssl --skip-ssl
 
-  rabbitmq:
-    image: rabbitmq:management
-    container_name: rabbitmq
-    ports:
-      - "5672:5672"     # porta para apps
-      - "15672:15672"   # dashboard web
-    networks:
-      - shipping-network
-
-  shipping-service:
+  order-service:
     build: .
     profiles:
       - application
-    container_name: shipping-service
+    container_name: order-service
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-shipping:3306/shipping_db
-      SPRING_DATASOURCE_USERNAME: shipping_user
-      SPRING_DATASOURCE_PASSWORD: shipping_pass
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-order:3306/order_db
+      SPRING_DATASOURCE_USERNAME: order_user
+      SPRING_DATASOURCE_PASSWORD: order_pass
     depends_on:
-      - mysql-shipping
+      - mysql-order
       - rabbitmq
     ports:
       - "8081:8081"
     command: >
       sh -c "
         echo 'Aguardando MySQL...';
-        until mysqladmin ping -h mysql-shipping --silent; do
+        until mysqladmin ping -h mysql-order --silent; do
           echo 'Ainda não disponivel...';
           sleep 2;
         done;
@@ -51,10 +42,10 @@ services:
         java -jar app.jar
       "
     networks:
-      - shipping-network
+      - order-network
 
 volumes:
-  mysql-shipping-data:
+  mysql-order-data:
 
 networks:
-  shipping-network:
+  order-network:

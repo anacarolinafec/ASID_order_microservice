@@ -1,11 +1,9 @@
 package com.ijse.bookstore.repository;
 
+import com.ijse.bookstore.entity.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.ijse.bookstore.entity.ShippingOrder;
-
 @Repository
-public interface ShippingOrderRepository extends JpaRepository<ShippingOrder,Long>{
- 
+public interface OrderRepository extends JpaRepository<Order,Long>{
 }

@@ -9,19 +9,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ijse.bookstore.service.OrderDetailsService;
-
+import com.ijse.bookstore.service.OrderService;
 
 @RestController
-public class OrderDetailsController {
+public class OrderController {
     
     @Autowired
-    private OrderDetailsService orderDetailsService;
+    private OrderService orderService;
 
-    @PostMapping("/orderdetails")
+    @PostMapping("/order")
     public ResponseEntity<Order> createOrder(@RequestBody NewOrderDTO newOrderDTO) {
 
-        Order orderedDetails = orderDetailsService.createOrderDetails(newOrderDTO);
+        Order orderedDetails = orderService.createOrderDetails(newOrderDTO);
 
         return new ResponseEntity<>(orderedDetails,HttpStatus.CREATED);
     }

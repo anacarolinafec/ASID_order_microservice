@@ -1,10 +1,10 @@
 package com.ijse.bookstore.entity;
 
-import java.util.Date;
-import java.util.List;
-
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.Date;
+import java.util.List;
 
 @Entity
 @Data
@@ -13,7 +13,6 @@ public class Order {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "orderid")
     private Long id;
 
     @Column
@@ -22,10 +21,9 @@ public class Order {
     @Column
     private double totalPrice;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @Column
+    private long userId;
 
-    @OneToMany
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetails> orderDetails;
 }
