@@ -30,7 +30,7 @@ services:
       - mysql-order
       #- rabbitmq
     ports:
-      - "8081:8081"
+      - "8083:8083"
     command: >
       sh -c "
         echo 'Aguardando MySQL...';

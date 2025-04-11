@@ -17,10 +17,12 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    @PostMapping("/order") // criar uma order no order-service
+
+    @PostMapping("/order")
     public ResponseEntity<Order> createOrder(@RequestBody NewOrderDTO newOrderDTO) {
 
         Order orderedDetails = orderService.createOrderDetails(newOrderDTO);
+        // criar um objeto do tipo order atraves do orderdto recebido
 
         return new ResponseEntity<>(orderedDetails,HttpStatus.CREATED);
     }

@@ -21,6 +21,7 @@ public class OrderDetails {
 
     @Column
     private Long bookId;
+    //uma order detail esta para um cartitem e um cartItem apenas (dai ter associado a si um livro - bookID - enves de uma lista de livros)
 
     @Column
     private Long userId;
