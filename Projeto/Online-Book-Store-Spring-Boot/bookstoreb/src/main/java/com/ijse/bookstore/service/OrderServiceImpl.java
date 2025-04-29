@@ -2,6 +2,7 @@ package com.ijse.bookstore.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ijse.bookstore.client.BookServiceHTTPClient;
 import com.ijse.bookstore.client.CartServiceHTTPClient;
 import com.ijse.bookstore.client.UserServiceHTTPClient;
 import com.ijse.bookstore.dto.*;
@@ -34,6 +35,8 @@ public class OrderServiceImpl implements OrderService {
     UserServiceHTTPClient userServiceHTTPClient;
     @Autowired
     CartServiceHTTPClient cartServiceHTTPClient;
+    @Autowired
+    BookServiceHTTPClient bookServiceHTTPClient;
 
     public Order createOrderDetails(NewOrderDTO newOrderDTO) {
 
@@ -46,15 +49,22 @@ public class OrderServiceImpl implements OrderService {
         CartResponseDTO cart = cartServiceHTTPClient.getCartOfUserId(newOrderDTO.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("Cart nao existe"));
 
+
         //Para cada item no carrinho, é criado um OrderDetail (bookid, quantity, subtotal...)
         List<OrderDetails> orderDetails = createOrderDetailsFromCartItems(cart.getCartItems(), user);
 
         //Criar uma order e dar os sets
         Order order = new Order();
         order.setOrderDate(Date.from(Instant.now()));
+
+        for ( OrderDetails orderDetail : orderDetails) { //associar a orderdetail a order
+            orderDetail.setOrder(order);
+        }
+
         order.setOrderDetails(orderDetails);
         order.setTotalPrice(calculateTotalPrice(orderDetails));
         order.setUserId(user.getId());
+
 
         //guardar a nova ordem no repositorio de orders
         order = orderRepository.save(order);
@@ -87,7 +97,9 @@ public class OrderServiceImpl implements OrderService {
        //pecorre a lista de cartItems
         for(var cartItem: cartItems){
             //obtem o book/cartitem
-            var book = cartItem.getBookid();
+            var bookid = cartItem.getBookid();
+
+            var book = bookServiceHTTPClient.getBookbyId(bookid).orElseThrow(() -> new IllegalArgumentException("book nao existe"));
 
             //cria um orderdetail e dar os sets necessarios
             var orderDetail = new OrderDetails();
@@ -113,4 +125,19 @@ public class OrderServiceImpl implements OrderService {
         }
         return sum/orderDetails.size();
     }
+
+
+    public Order getOrderByUserId(Long userId) {
+
+        List<Order> allOrders = orderRepository.findAll();
+
+        for (Order order : allOrders) {
+
+            if (order.getUserId() == userId) {
+                return order;
+            }
+        }
+        return null; // ou lançar exceção se preferires
+    }
+
 }

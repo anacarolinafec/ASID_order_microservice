@@ -24,7 +24,7 @@ public class Order {
     @Column
     private long userId;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<OrderDetails> orderDetails;
     //uma order detail esta para um cartitem e um cartItem apenas (dai ter associado a si um livro - bookID - enves de uma lista de livros)
     // uma order e a juncao de todos os cartitems ou seja, e uma lista de orderdetails

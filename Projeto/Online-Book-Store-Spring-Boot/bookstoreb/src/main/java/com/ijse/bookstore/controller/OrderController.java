@@ -5,11 +5,11 @@ import com.ijse.bookstore.entity.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.ijse.bookstore.service.OrderService;
+
+import java.util.List;
 
 @RestController
 public class OrderController {
@@ -26,4 +26,16 @@ public class OrderController {
 
         return new ResponseEntity<>(orderedDetails,HttpStatus.CREATED);
     }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Order> getOrderByUserId(@PathVariable Long userId) {
+        Order order = orderService.getOrderByUserId(userId);
+
+        if (order != null) {
+            return new ResponseEntity<>(order, HttpStatus.OK);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }
