@@ -1,0 +1,68 @@
+services:
+  mysql-order:
+    image: mysql:8.0.0
+    container_name: mysql-order
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: order_db
+      MYSQL_USER: order_user
+      MYSQL_PASSWORD: order_pass
+    ports:
+      # expor localmente na porta 3307 - "3307:3307"
+      - "3308:3306"
+    volumes:
+      - mysql-order-data:/var/lib/mysql
+    networks:
+      - order-network
+    command: --disable-ssl --skip-ssl
+
+  mysql-order-query:
+    image: mysql:8.0.0
+    container_name: mysql-order-query
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: order_db_query
+      MYSQL_USER: query_user
+      MYSQL_PASSWORD: query_pass
+    ports:
+      - "3312:3306"
+    volumes:
+      - mysql-order-query-data:/var/lib/mysql
+    networks:
+      - order-network
+
+  order-service:
+    build: Projeto/Online-Book-Store-Spring-Boot/bookstoreb
+    profiles:
+      - application
+    container_name: order-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-order:3306/order_db
+      SPRING_DATASOURCE_USERNAME: order_user
+      SPRING_DATASOURCE_PASSWORD: order_pass
+    depends_on:
+      - mysql-order
+      #- rabbitmq
+    ports:
+      - "8083:8083"
+    command: >
+      sh -c "
+        echo 'Aguardando MySQL...';
+        until mysqladmin ping -h mysql-order --silent; do
+          echo 'Ainda não disponivel...';
+          sleep 2;
+        done;
+        echo 'MySQL pronto! A iniciar aplicacao...';
+        java -jar app.jar
+      "
+    networks:
+      - order-network
+
+volumes:
+  mysql-order-data:
+  mysql-order-query-data:
+
+networks:
+  order-network:
