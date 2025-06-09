@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -24,7 +25,6 @@ public class OrderServiceQueryImpl implements OrderServiceQuery {
     private MessageProducer messageProducer;
     @Autowired
     private OrderQueryRepository orderqueryRepository;
-
 
     @Override
     public void createOrderFromMessage(OrderQueryRecievedDTO orderQueryRecievedDTO) {
@@ -64,4 +64,29 @@ public class OrderServiceQueryImpl implements OrderServiceQuery {
         return orders.get(0);
     }
 
+    @Override
+    public List<OrderQuery> getOrderHistoryByUserIdAndDateRange(Long userId, Date startDate, Date endDate) {
+        // Validações básicas (importante para evitar erros e queries desnecessárias)
+        if (userId == null) {
+            log.warn("Attempted to get order history with null userId.");
+            throw new IllegalArgumentException("User ID must not be null.");
+        }
+        if (startDate == null) {
+            log.warn("Attempted to get order history for userId {} with null startDate.", userId);
+            throw new IllegalArgumentException("Start date must not be null.");
+        }
+        if (endDate == null) {
+            log.warn("Attempted to get order history for userId {} with null endDate.", userId);
+            throw new IllegalArgumentException("End date must not be null.");
+        }
+        if (startDate.after(endDate)) {
+            log.warn("Attempted to get order history for userId {} with startDate after endDate ({} > {}).", userId, startDate, endDate);
+            throw new IllegalArgumentException("Start date cannot be after end date.");
+        }
+
+        log.info("Fetching order history for userId: {} between {} and {}", userId, startDate, endDate);
+        List<OrderQuery> orders = orderqueryRepository.findByUserIdAndOrderDateBetween(userId, startDate, endDate);
+        log.info("Found {} orders for userId: {} in the given date range.", orders.size(), userId);
+        return orders;
+    }
 }
